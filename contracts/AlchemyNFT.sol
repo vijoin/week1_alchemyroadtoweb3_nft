@@ -11,11 +11,15 @@ contract AlchemyNFT is ERC721, ERC721Enumerable, ERC721URIStorage {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
+    uint256 maxSupply;
 
-    constructor() ERC721("Alchemy", "ALCH") {}
+    constructor(uint256 _maxSupply) ERC721("Alchemy", "ALCH") {
+        maxSupply = _maxSupply;
+    }
 
     function safeMint(address to) public {
         uint256 tokenId = _tokenIdCounter.current();
+        require(tokenId < maxSupply, "I'm sorry, we reached the cap");
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
     }
