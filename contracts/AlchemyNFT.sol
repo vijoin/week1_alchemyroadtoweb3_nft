@@ -22,7 +22,7 @@ contract AlchemyNFT is ERC721, ERC721Enumerable, ERC721URIStorage {
         maxMintByAccount = _maxMintByAccount;
     }
 
-    function safeMint(address to) public {
+    function safeMint(address to, string memory uri) public {
         uint256 tokenId = _tokenIdCounter.current();
         require(tokenId < maxSupply, "I'm sorry, we reached the cap");
         require(
@@ -32,6 +32,7 @@ contract AlchemyNFT is ERC721, ERC721Enumerable, ERC721URIStorage {
 
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
+        _setTokenURI(tokenId, uri);
     }
 
     // overrides required by Solidity
