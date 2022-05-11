@@ -9,11 +9,12 @@ describe("Alchemy NFT Contract", () => {
   let addr1;
   let addrs;
   let maxSupply = 100;
+  let maxMintByAccount = 50;
 
   beforeEach(async () => {
     Alchemy = await ethers.getContractFactory("AlchemyNFT");
     [owner, addr1, ...addrs] = await ethers.getSigners();
-    alchemy = await Alchemy.deploy(maxSupply);
+    alchemy = await Alchemy.deploy(maxSupply, maxMintByAccount);
   });
 
   describe("Transactions", () => {
@@ -30,18 +31,29 @@ describe("Alchemy NFT Contract", () => {
     });
 
     it("Max Supply reached", async () => {
-      for (let i = 0; i < maxSupply; i++) {
+      for (let i = 0; i < maxSupply / 2; i++) {
         await alchemy.safeMint(owner.address);
+        await alchemy.safeMint(addr1.address);
       }
       await expect(alchemy.safeMint(owner.address)).to.be.revertedWith(
         "I'm sorry, we reached the cap"
+      );
+    });
+
+    it("Max Mint by Account reached", async () => {
+      for (let i = 0; i < maxMintByAccount; i++) {
+        await alchemy.safeMint(addr1.address);
+      }
+      await expect(alchemy.safeMint(addr1.address)).to.be.revertedWith(
+        "I'm sorry, you reached the cap allowed by Account"
       );
     });
   });
 
   describe("Enumerable capabilities", () => {
     it("Count all NFTs minted", async () => {
-      const minted_count = Math.floor(Math.random() * maxSupply);
+      const minted_count =
+        Math.ceil(Math.random() * maxSupply) % maxMintByAccount;
       for (let i = 0; i < minted_count; i++) {
         await alchemy.safeMint(owner.address);
       }

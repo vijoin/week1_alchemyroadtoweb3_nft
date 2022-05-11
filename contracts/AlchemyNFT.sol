@@ -6,20 +6,30 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "hardhat/console.sol";
 
 contract AlchemyNFT is ERC721, ERC721Enumerable, ERC721URIStorage {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
     uint256 maxSupply;
+    uint256 maxMintByAccount;
 
-    constructor(uint256 _maxSupply) ERC721("Alchemy", "ALCH") {
+    constructor(uint256 _maxSupply, uint256 _maxMintByAccount)
+        ERC721("Alchemy", "ALCH")
+    {
         maxSupply = _maxSupply;
+        maxMintByAccount = _maxMintByAccount;
     }
 
     function safeMint(address to) public {
         uint256 tokenId = _tokenIdCounter.current();
         require(tokenId < maxSupply, "I'm sorry, we reached the cap");
+        require(
+            balanceOf(to) < maxMintByAccount,
+            "I'm sorry, you reached the cap allowed by Account"
+        );
+
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
     }
